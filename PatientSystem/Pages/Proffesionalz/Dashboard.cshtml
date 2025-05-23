@@ -1,0 +1,31 @@
+@page
+@model PatientSystem.Pages.Proffesionalz.DashboardModel
+@{
+    ViewData["Title"] = "Professional Dashboard";
+}
+
+<h1>Professional Dashboard</h1>
+
+<form method="get" class="mb-4">
+    <div class="form-group">
+        <label for="patientId">Select Patient</label>
+        <select id="patientId" name="patientId" class="form-control" onchange="this.form.submit()">
+            <option value="">-- Select Patient --</option>
+            @foreach (var patient in Model.PatientOptions)
+            {
+                if (Model.SelectedPatientId == patient.Value)
+                {
+                    <option value="@patient.Value" selected="selected">@patient.Text</option>
+                }
+                else
+                {
+                    <option value="@patient.Value">@patient.Text</option>
+                }
+            }
+        </select>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

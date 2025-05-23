@@ -1,0 +1,106 @@
+@page
+@model PatientSystem.Pages.Patientz.MedicalRecordsModel
+@{
+    ViewData["Title"] = "Medical Records";
+}
+
+<h1>Medical Records</h1>
+
+<p>Loaded patients: @Model.PatientOptions.Count</p>
+
+<form method="get" class="mb-4">
+    <div class="form-group">
+        <label for="patientId">Select Patient</label>
+        <select id="patientId" name="patientId" class="form-control" onchange="this.form.submit()">
+            <option value="">-- Select Patient --</option>
+            @foreach (var patient in Model.PatientOptions)
+            {
+                if (Model.SelectedPatientId == patient.Value)
+                {
+                    <option value="@patient.Value" selected="selected">@patient.Text</option>
+                }
+                else
+                {
+                    <option value="@patient.Value">@patient.Text</option>
+                }
+            }
+        </select>
+    </div>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.SelectedPatientId) && Model.SelectedPatient != null)
+{
+    <div class="mb-4">
+        <h4>Patient Information</h4>
+        <table class="table table-bordered w-auto">
+            <tr><th>Name</th><td>@Model.SelectedPatient.Name</td></tr>
+            <tr><th>Email</th><td>@Model.SelectedPatient.Email</td></tr>
+            <tr><th>Date of Birth</th><td>@Model.SelectedPatient.DateOfBirth?.ToShortDateString()</td></tr>
+        </table>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.SelectedPatientId))
+{
+    <div class="mb-4">
+        <h4>Add New Medical Record</h4>
+        <form method="post">
+            <input type="hidden" name="patientId" value="@Model.SelectedPatientId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-2">
+                <label asp-for="NewMedicalRecord.Diagnosis" class="control-label">Diagnosis</label>
+                <input asp-for="NewMedicalRecord.Diagnosis" class="form-control" />
+                <span asp-validation-for="NewMedicalRecord.Diagnosis" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="NewMedicalRecord.Treatment" class="control-label">Treatment</label>
+                <input asp-for="NewMedicalRecord.Treatment" class="form-control" />
+                <span asp-validation-for="NewMedicalRecord.Treatment" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="NewMedicalRecord.Prescription" class="control-label">Prescription</label>
+                <input asp-for="NewMedicalRecord.Prescription" class="form-control" />
+                <span asp-validation-for="NewMedicalRecord.Prescription" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="NewMedicalRecord.DateCreated" class="control-label">Date Created</label>
+                <input asp-for="NewMedicalRecord.DateCreated" class="form-control" type="date" />
+                <span asp-validation-for="NewMedicalRecord.DateCreated" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Record</button>
+        </form>
+    </div>
+
+    @if (Model.Records != null && Model.Records.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Diagnosis</th>
+                    <th>Treatment</th>
+                    <th>Prescription</th>
+                    <th>Date Created</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var rec in Model.Records)
+            {
+                <tr>
+                    <td>@rec.Diagnosis</td>
+                    <td>@rec.Treatment</td>
+                    <td>@rec.Prescription</td>
+                    <td>@rec.DateCreated.ToShortDateString()</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No medical records found.</p>
+    }
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

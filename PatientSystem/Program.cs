@@ -1,3 +1,4 @@
+using Coravel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PatientSystem.Data;
@@ -17,6 +18,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 
+builder.Services.AddScheduler();
+builder.Services.AddTransient<PatientSystem.MyInvocable>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -31,13 +36,30 @@ else
     app.UseHsts();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+   // DbInitializer.Initialize(context);
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseSerilogRequestLogging();
 
 app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.Services.UseScheduler(scheduler =>
+{
+    scheduler.Schedule<PatientSystem.MyInvocable>()
+        .EveryMinute();
+        //.EveryFiveMinutes();
+        //.PreventOverlapping();
+});
 
 app.Run();
