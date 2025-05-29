@@ -1,0 +1,89 @@
+@page "{id:int}"
+@model PatientSystem.Pages.Proffesionalz.PatientDetailsModel
+@{
+    ViewData["Title"] = "Patient Details";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 bg-light p-4 rounded">
+            <h3>Patient</h3>
+            <div class="mb-2"><strong>Name:</strong> @Model.Patient.Name</div>
+            <div class="mb-2"><strong>Date of Birth:</strong> @Model.Patient.DateOfBirth?.ToShortDateString()</div>
+            <div class="mb-2"><strong>Patient ID:</strong> @Model.Patient.Id</div>
+            <div class="mb-2"><strong>Email:</strong> @Model.Patient.Email</div>
+        </div>
+        <div class="col-md-9 p-4">
+            <div class="mb-4">
+                <h5>Upcoming Appointments</h5>
+                @if (Model.UpcomingAppointments.Any())
+                {
+                    <div class="d-flex flex-wrap gap-3">
+                        @foreach (var appt in Model.UpcomingAppointments)
+                        {
+                            <div class="card p-3" style="min-width:260px;">
+                                <div><strong>@appt.Date.ToString("dddd, MMM dd, yyyy HH:mm")</strong></div>
+                                <div>@appt.Professional?.Name</div>
+                                <div class="mt-2">
+                                    <a class="btn btn-outline-primary btn-sm" href="#">Join Call</a>
+                                    <a class="btn btn-outline-secondary btn-sm" href="#">Edit</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p>No upcoming appointments.</p>
+                }
+            </div>
+            <div class="mb-4">
+                <h5>Notes</h5>
+                <textarea class="form-control mb-2" rows="3" placeholder="Enter notes here...">@Model.Notes</textarea>
+            </div>
+            <div class="mb-4">
+                <h5>Known Allergies</h5>
+                @if (Model.Allergies.Any())
+                {
+                    <div>
+                        @foreach (var allergy in Model.Allergies)
+                        {
+                            <span class="badge bg-info text-dark me-1">@allergy</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <span>No known allergies.</span>
+                }
+                <button class="btn btn-outline-primary btn-sm ms-2">Edit</button>
+            </div>
+            <div class="mb-4">
+                <h5>Prescribed Medications</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Dosage</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var med in Model.Medications)
+                    {
+                        <tr>
+                            <td>@med.Name</td>
+                            <td>@med.Dosage</td>
+                            <td>@med.StartDate.ToShortDateString()</td>
+                            <td>@(med.EndDate.HasValue ? med.EndDate.Value.ToShortDateString() : "-")</td>
+                            <td><a class="btn btn-outline-secondary btn-sm" href="#">Edit</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

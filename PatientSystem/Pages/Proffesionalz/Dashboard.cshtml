@@ -6,25 +6,101 @@
 
 <h1>Professional Dashboard</h1>
 
-<form method="get" class="mb-4">
-    <div class="form-group">
-        <label for="patientId">Select Patient</label>
-        <select id="patientId" name="patientId" class="form-control" onchange="this.form.submit()">
-            <option value="">-- Select Patient --</option>
-            @foreach (var patient in Model.PatientOptions)
+<div class="row">
+    <div class="col-md-8">
+        <form method="get" class="mb-4">
+            <div class="form-group">
+                <label for="search">Search Patient</label>
+                <input type="text" id="search" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Enter patient name..." />
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Search</button>
+        </form>
+
+        @if (Model.SearchResults != null && Model.SearchResults.Count > 0)
+        {
+            <div class="mb-4">
+                <h4>Search Results</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Date of Birth</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var patient in Model.SearchResults)
+                    {
+                        <tr>
+                            <td><a asp-page="/Proffesionalz/PatientDetails" asp-route-id="@patient.Id">@patient.Name</a></td>
+                            <td>@patient.Email</td>
+                            <td>@patient.DateOfBirth?.ToShortDateString()</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div class="mb-4">
+            <h4>Upcoming Appointments</h4>
+            @if (Model.ClosestAppointments != null && Model.ClosestAppointments.Count > 0)
             {
-                if (Model.SelectedPatientId == patient.Value)
-                {
-                    <option value="@patient.Value" selected="selected">@patient.Text</option>
-                }
-                else
-                {
-                    <option value="@patient.Value">@patient.Text</option>
-                }
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var appt in Model.ClosestAppointments)
+                    {
+                        <tr>
+                            <td>@appt.Date.ToShortDateString()</td>
+                            <td>@appt.Time</td>
+                            <td>@appt.Patient?.Name</td>
+                            <td>@appt.Status</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
             }
-        </select>
+            else
+            {
+                <p>No upcoming appointments found.</p>
+            }
+        </div>
     </div>
-</form>
+    <div class="col-md-4">
+        <div class="mb-4">
+            <h4>Notes</h4>
+            <form method="post">
+                <div class="form-group mb-2">
+                    <textarea name="NoteText" class="form-control" rows="8" placeholder="Add a note...">@Model.NoteText</textarea>
+                </div>
+                <button type="submit" class="btn btn-secondary">Save Note</button>
+            </form>
+            @if (Model.Notes != null && Model.Notes.Count > 0)
+            {
+                <ul class="list-group mt-2">
+                    @foreach (var note in Model.Notes)
+                    {
+                        <li class="list-group-item">
+                            <strong>@note.CreatedAt.ToShortDateString()</strong>: @note.Text
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No notes found.</p>
+            }
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
