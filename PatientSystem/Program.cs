@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PatientSystem.Data;
 using Serilog;
+using System.Security.Cryptography.Pkcs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 
@@ -41,6 +43,57 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
    // DbInitializer.Initialize(context);
+
+    var rm = services.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    string[] roleNames = { "Admin", "Patient", "Professional" };
+    foreach (var roleName in roleNames)
+    {
+        var roleExist = await rm.RoleExistsAsync(roleName);
+        if (!roleExist)
+        {
+            await rm.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+  /*  // admin lietotjs
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var adminEmail = "admin@example.com";
+    var adminPassword = "Admin@123";
+
+    var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail };
+    var userExist = await userManager.FindByEmailAsync(adminEmail);
+
+    if (userExist == null)
+    {
+        await userManager.CreateAsync(adminUser, adminPassword);
+        await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
+    
+    #region Create default roles and users for testing purposes
+    var defaultPassword = "Test123!"; // Or use a secure one
+
+    foreach (var patient in context.Patients.ToList())
+    {
+        var user = new IdentityUser { UserName = patient.Email, Email = patient.Email };
+        var result = await userManager.CreateAsync(user, defaultPassword);
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(user, "Patient");
+        }
+    }
+    foreach (var professional in context.Professionals.ToList())
+    {
+        var user = new IdentityUser { UserName = professional.Email, Email = professional.Email };
+        var result = await userManager.CreateAsync(user, defaultPassword);
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(user, "Professional");
+        }
+    }
+
+    #endregion */
 }
 
 app.UseHttpsRedirection();
