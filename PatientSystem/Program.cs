@@ -55,7 +55,7 @@ using (var scope = app.Services.CreateScope())
             await rm.CreateAsync(new IdentityRole(roleName));
         }
     }
-  /*  // admin lietotjs
+  /*  // admin user
     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     var adminEmail = "admin@example.com";
     var adminPassword = "Admin@123";

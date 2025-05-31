@@ -26,12 +26,27 @@
 
                         @if (User.Identity.IsAuthenticated)
                         {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Proffesionalz/Index">Professionals</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Patientz/Index">Patients</a>
-                        </li>
+                            if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Proffesionalz/Index">Professionals</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Patientz/Index">Patients</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Professional"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Proffesionalz/Index">Professionals</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Patient"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Patientz/Index">Patients</a>
+                                </li>
+                            }
                         }
 
                     </ul>
