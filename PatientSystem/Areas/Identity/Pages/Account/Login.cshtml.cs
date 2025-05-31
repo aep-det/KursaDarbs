@@ -48,32 +48,13 @@ namespace PatientSystem.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            ReturnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByEmailAsync(Input.Email);
-                    if (user != null)
-                    {
-                        var roles = await _userManager.GetRolesAsync(user);
-                        // Professionals: always redirect to dashboard, ignore ReturnUrl
-                        if (roles.Contains("Professional") || Input.Email.ToLower().StartsWith("professional"))
-                        {
-                            return RedirectToPage("/Proffesionalz/Dashboard");
-                        }
-                        // Patients: always redirect to medical records
-                        if (roles.Contains("Patient") || Input.Email.ToLower().StartsWith("patient"))
-                        {
-                            return RedirectToPage("/Patientz/MedicalRecords");
-                        }
-                        // Admin: use ReturnUrl or home
-                        if (roles.Contains("Admin"))
-                        {
-                            return LocalRedirect(returnUrl ?? Url.Content("~/"));
-                        }
-                    }
-                    return LocalRedirect(returnUrl ?? Url.Content("~/"));
+                    return LocalRedirect(ReturnUrl);
                 }
                 if (result.IsLockedOut)
                 {
