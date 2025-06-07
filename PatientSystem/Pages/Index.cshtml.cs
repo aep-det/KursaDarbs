@@ -27,7 +27,7 @@ namespace PatientSystem.Pages
                 }
                 else if (User.IsInRole("Patient"))
                 {
-                    Response.Redirect("/Patientz/Index");
+                    Response.Redirect("/Patientz/MyMedicalRecord");
                 }
                 else if (User.IsInRole("Admin"))
                 {
