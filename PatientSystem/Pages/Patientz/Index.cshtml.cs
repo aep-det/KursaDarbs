@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PatientSystem.Pages.Patientz
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly PatientSystem.Data.ApplicationDbContext _context;
@@ -20,7 +20,7 @@ namespace PatientSystem.Pages.Patientz
             _context = context;
         }
 
-        public IList<Patient> Patient { get;set; } = default!;
+        public IList<Patient> Patient { get; set; } = default!;
 
         public async Task OnGetAsync()
         {

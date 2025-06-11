@@ -41,12 +41,7 @@
                                     <a class="nav-link text-dark" asp-area="" asp-page="/Proffesionalz/Index">Professionals</a>
                                 </li>
                             }
-                            else if (User.IsInRole("Patient"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-page="/Patientz/Index">Patients</a>
-                                </li>
-                            }
+                            // Removed Patients button for Patient role
                         }
 
                     </ul>
