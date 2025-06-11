@@ -42,58 +42,69 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
-   // DbInitializer.Initialize(context);
+    await context.Database.EnsureCreatedAsync();
+    //await context.Database.MigrateAsync();
 
     var rm = services.GetRequiredService<RoleManager<IdentityRole>>();
-    
-    string[] roleNames = { "Admin", "Patient", "Professional" };
-    foreach (var roleName in roleNames)
+
+    if (!rm.Roles.Any())
     {
-        var roleExist = await rm.RoleExistsAsync(roleName);
-        if (!roleExist)
+        DbInitializer.Initialize(context);
+
+        string[] roleNames = { "Admin", "Patient", "Professional" };
+        foreach (var roleName in roleNames)
         {
-            await rm.CreateAsync(new IdentityRole(roleName));
+            var roleExist = await rm.RoleExistsAsync(roleName);
+            if (!roleExist)
+            {
+                await rm.CreateAsync(new IdentityRole(roleName));
+            }
         }
-    }
-  /*  // admin user
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-    var adminEmail = "admin@example.com";
-    var adminPassword = "Admin@123";
 
-    var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail };
-    var userExist = await userManager.FindByEmailAsync(adminEmail);
+        // admin user
+        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var adminEmail = "admin@example.com";
+        var adminPassword = "Admin@123";
 
-    if (userExist == null)
-    {
-        await userManager.CreateAsync(adminUser, adminPassword);
-        await userManager.AddToRoleAsync(adminUser, "Admin");
-    }
-    
-    #region Create default roles and users for testing purposes
-    var defaultPassword = "Test123!"; // Or use a secure one
+        var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail };
+        var userExist = await userManager.FindByEmailAsync(adminEmail);
 
-    foreach (var patient in context.Patients.ToList())
-    {
-        var user = new IdentityUser { UserName = patient.Email, Email = patient.Email };
-        var result = await userManager.CreateAsync(user, defaultPassword);
-
-        if (result.Succeeded)
+        if (userExist == null)
         {
-            await userManager.AddToRoleAsync(user, "Patient");
+            await userManager.CreateAsync(adminUser, adminPassword);
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
-    }
-    foreach (var professional in context.Professionals.ToList())
-    {
-        var user = new IdentityUser { UserName = professional.Email, Email = professional.Email };
-        var result = await userManager.CreateAsync(user, defaultPassword);
 
-        if (result.Succeeded)
+        #region Create default roles and users for testing purposes
+
+        var defaultPassword = "Test123!"; // Or use a secure one
+
+        foreach (var patient in context.Patients.ToList())
         {
-            await userManager.AddToRoleAsync(user, "Professional");
+            var user = new IdentityUser { UserName = patient.Email, Email = patient.Email };
+            var result = await userManager.CreateAsync(user, defaultPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, "Patient");
+            }
         }
+
+        foreach (var professional in context.Professionals.ToList())
+        {
+            var user = new IdentityUser { UserName = professional.Email, Email = professional.Email };
+            var result = await userManager.CreateAsync(user, defaultPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, "Professional");
+            }
+        }
+
+        #endregion
+
     }
 
-    #endregion */
 }
 
 app.UseHttpsRedirection();
