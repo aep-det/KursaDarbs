@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace PatientSystem.Pages.Patientz
 {
@@ -26,7 +27,10 @@ namespace PatientSystem.Pages.Patientz
         public List<SelectListItem> AvailableTimes { get; set; } = new();
 
         [BindProperty]
-        public AppointmentInputModel NewAppointment { get; set; } = new AppointmentInputModel();
+        public AppointmentInputModel NewAppointment { get; set; } = new AppointmentInputModel
+        {
+            Date = DateTime.Today
+        };
 
         public class AppointmentInputModel
         {
@@ -44,30 +48,46 @@ namespace PatientSystem.Pages.Patientz
             public string Status { get; set; } = "Scheduled";
         }
 
-        public async Task OnGetAsync(int? patientId = null)
+        public async Task OnGetAsync()
         {
-            await LoadAppointmentsAndProfessionals(patientId);
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == userEmail);
+            if (patient != null)
+            {
+                await LoadAppointmentsAndProfessionals(patient.Id);
+            }
+            else
+            {
+                Appointments = new List<Appointment>();
+            }
             LoadAvailableTimes();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? patientId = null)
+        public async Task<IActionResult> OnPostAsync()
         {
             LoadAvailableTimes();
-            if (!ModelState.IsValid)
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == userEmail);
+            if (patient == null)
             {
-                await LoadAppointmentsAndProfessionals(patientId);
+                ModelState.AddModelError(string.Empty, "Could not resolve patient for current user.");
+                await LoadAppointmentsAndProfessionals(null);
                 return Page();
             }
 
-            // For demo: use first patient if patientId is not provided
-            int resolvedPatientId = patientId ?? _context.Patients.Select(p => p.Id).FirstOrDefault();
+            if (!ModelState.IsValid)
+            {
+                await LoadAppointmentsAndProfessionals(patient.Id);
+                return Page();
+            }
+
             var appointment = new Appointment
             {
                 Date = NewAppointment.Date,
                 Time = NewAppointment.Time,
                 ProfessionalId = NewAppointment.ProfessionalId,
                 Status = NewAppointment.Status,
-                PatientId = resolvedPatientId
+                PatientId = patient.Id
             };
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
@@ -79,6 +99,10 @@ namespace PatientSystem.Pages.Patientz
 
         private async Task LoadAppointmentsAndProfessionals(int? patientId)
         {
+            ProfessionalOptions = await _context.Professionals
+                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
+                .ToListAsync();
+
             if (patientId.HasValue)
             {
                 Appointments = await _context.Appointments
@@ -88,18 +112,12 @@ namespace PatientSystem.Pages.Patientz
             }
             else
             {
-                Appointments = await _context.Appointments
-                    .Include(a => a.Professional)
-                    .ToListAsync();
+                Appointments = new List<Appointment>();
             }
-            ProfessionalOptions = await _context.Professionals
-                .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
-                .ToListAsync();
         }
 
         private void LoadAvailableTimes()
         {
-            // Hardcoded for now; later, fetch from Professionalz table
             AvailableTimes = new List<SelectListItem>
             {
                 new SelectListItem { Value = "09:00", Text = "09:00" },
