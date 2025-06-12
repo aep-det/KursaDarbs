@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace PatientSystem.Pages.Proffesionalz
 {
@@ -35,7 +36,9 @@ namespace PatientSystem.Pages.Proffesionalz
 
         public async Task OnGetAsync(string? search = null)
         {
-            int professionalId = 1; // Replace with actual user/professional id in real app
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var professional = await _context.Professionals.FirstOrDefaultAsync(p => p.Email == userEmail);
+            int? professionalId = professional?.Id;
             SearchTerm = search;
             await LoadSearchResults(search);
             await LoadClosestAppointments(professionalId);
@@ -44,7 +47,9 @@ namespace PatientSystem.Pages.Proffesionalz
 
         public async Task<IActionResult> OnPostAsync(string? search = null)
         {
-            int professionalId = 1;
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var professional = await _context.Professionals.FirstOrDefaultAsync(p => p.Email == userEmail);
+            int? professionalId = professional?.Id;
             SearchTerm = search;
             await LoadSearchResults(search);
             if (!string.IsNullOrWhiteSpace(NoteText))
@@ -67,15 +72,22 @@ namespace PatientSystem.Pages.Proffesionalz
             SearchResults = await query.ToListAsync();
         }
 
-        private async Task LoadClosestAppointments(int professionalId)
+        private async Task LoadClosestAppointments(int? professionalId)
         {
             var today = DateTime.Today;
-            ClosestAppointments = await _context.Appointments
-                .Include(a => a.Patient)
-                .Where(a => a.ProfessionalId == professionalId && a.Date >= today)
-                .OrderBy(a => a.Date).ThenBy(a => a.Time)
-                .Take(10)
-                .ToListAsync();
+            if (professionalId.HasValue)
+            {
+                ClosestAppointments = await _context.Appointments
+                    .Include(a => a.Patient)
+                    .Where(a => a.ProfessionalId == professionalId.Value && a.Date >= today)
+                    .OrderBy(a => a.Date).ThenBy(a => a.Time)
+                    .Take(10)
+                    .ToListAsync();
+            }
+            else
+            {
+                ClosestAppointments = new List<Appointment>();
+            }
         }
 
         private async Task LoadNotes()

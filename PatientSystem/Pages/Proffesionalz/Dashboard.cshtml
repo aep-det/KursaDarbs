@@ -16,7 +16,8 @@
             <button type="submit" class="btn btn-primary mt-2">Search</button>
         </form>
 
-        @if (Model.SearchResults != null && Model.SearchResults.Count > 0)
+        @* Only show search results if there is a search term and results, do not show all patients by default *@
+        @if (!string.IsNullOrWhiteSpace(Model.SearchTerm) && Model.SearchResults != null && Model.SearchResults.Count > 0)
         {
             <div class="mb-4">
                 <h4>Search Results</h4>

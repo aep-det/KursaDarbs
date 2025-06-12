@@ -5,6 +5,7 @@ using PatientSystem.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace PatientSystem.Pages.Proffesionalz
 {
@@ -19,20 +20,20 @@ namespace PatientSystem.Pages.Proffesionalz
 
         public IList<Appointment> Appointments { get; set; } = new List<Appointment>();
 
-        public async Task OnGetAsync(int? professionalId = null)
+        public async Task OnGetAsync()
         {
-            if (professionalId.HasValue)
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var professional = await _context.Professionals.FirstOrDefaultAsync(p => p.Email == userEmail);
+            if (professional != null)
             {
                 Appointments = await _context.Appointments
                     .Include(a => a.Patient)
-                    .Where(a => a.ProfessionalId == professionalId.Value)
+                    .Where(a => a.ProfessionalId == professional.Id)
                     .ToListAsync();
             }
             else
             {
-                Appointments = await _context.Appointments
-                    .Include(a => a.Patient)
-                    .ToListAsync();
+                Appointments = new List<Appointment>();
             }
         }
     }
