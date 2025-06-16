@@ -4,6 +4,7 @@
     ViewData["Title"] = "Professional Directory";
 }
 
+<div class="proffesionalz-theme">
 <h1>Professional Directory</h1>
 
 <form method="get" class="row g-3 mb-4">
@@ -15,7 +16,14 @@
             <option value="">All Specializations</option>
             @foreach (var spec in Model.Specializations)
             {
-                <option value="@spec" selected="@(Model.SelectedSpecialization == spec ? "selected" : null)">@spec</option>
+                if (Model.SelectedSpecialization == spec)
+                {
+                    <option value="@spec" selected>@spec</option>
+                }
+                else
+                {
+                    <option value="@spec">@spec</option>
+                }
             }
         </select>
     </div>
@@ -41,3 +49,4 @@
     }
     </tbody>
 </table>
+</div>
