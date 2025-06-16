@@ -6,6 +6,24 @@
 
 <h1>Professional Directory</h1>
 
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-6">
+        <input type="text" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Search by name..." />
+    </div>
+    <div class="col-md-4">
+        <select name="specialization" class="form-select">
+            <option value="">All Specializations</option>
+            @foreach (var spec in Model.Specializations)
+            {
+                <option value="@spec" selected="@(Model.SelectedSpecialization == spec ? "selected" : null)">@spec</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
