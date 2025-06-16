@@ -21,10 +21,11 @@ namespace PatientSystem.Pages.Patientz
             _context = context;
         }
 
-        // Use the Appointment entity from PatientSystem.Data
         public IList<Appointment> Appointments { get; set; } = new List<Appointment>();
         public List<SelectListItem> ProfessionalOptions { get; set; } = new();
         public List<SelectListItem> AvailableTimes { get; set; } = new();
+        public List<string> Specialities { get; set; } = new();
+        public string? SelectedSpeciality { get; set; }
 
         [BindProperty]
         public AppointmentInputModel NewAppointment { get; set; } = new AppointmentInputModel
@@ -48,17 +49,25 @@ namespace PatientSystem.Pages.Patientz
             public string Status { get; set; } = "Scheduled";
         }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(string? speciality)
         {
+            SelectedSpeciality = speciality;
+            Specialities = await _context.Professionals
+                .Select(p => p.Specialization)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToListAsync();
+
             var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
             var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == userEmail);
             if (patient != null)
             {
-                await LoadAppointmentsAndProfessionals(patient.Id);
+                await LoadAppointmentsAndProfessionals(patient.Id, speciality);
             }
             else
             {
                 Appointments = new List<Appointment>();
+                ProfessionalOptions = new List<SelectListItem>();
             }
             LoadAvailableTimes();
         }
@@ -66,18 +75,24 @@ namespace PatientSystem.Pages.Patientz
         public async Task<IActionResult> OnPostAsync()
         {
             LoadAvailableTimes();
+            Specialities = await _context.Professionals
+                .Select(p => p.Specialization)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToListAsync();
+
             var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
             var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Email == userEmail);
             if (patient == null)
             {
                 ModelState.AddModelError(string.Empty, "Could not resolve patient for current user.");
-                await LoadAppointmentsAndProfessionals(null);
+                await LoadAppointmentsAndProfessionals(null, null);
                 return Page();
             }
 
             if (!ModelState.IsValid)
             {
-                await LoadAppointmentsAndProfessionals(patient.Id);
+                await LoadAppointmentsAndProfessionals(patient.Id, null);
                 return Page();
             }
 
@@ -97,9 +112,14 @@ namespace PatientSystem.Pages.Patientz
             return RedirectToPage();
         }
 
-        private async Task LoadAppointmentsAndProfessionals(int? patientId)
+        private async Task LoadAppointmentsAndProfessionals(int? patientId, string? speciality)
         {
-            ProfessionalOptions = await _context.Professionals
+            var professionalsQuery = _context.Professionals.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(speciality))
+            {
+                professionalsQuery = professionalsQuery.Where(p => p.Specialization == speciality);
+            }
+            ProfessionalOptions = await professionalsQuery
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name })
                 .ToListAsync();
 
