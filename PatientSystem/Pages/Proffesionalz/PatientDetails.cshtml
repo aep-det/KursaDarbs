@@ -22,7 +22,7 @@
                         @foreach (var appt in Model.UpcomingAppointments)
                         {
                             <div class="card p-3" style="min-width:260px;">
-                                <div><strong>@appt.Date.ToString("dddd, MMM dd, yyyy HH:mm")</strong></div>
+                                <div><strong>@appt.Date.ToString("dddd, MMM dd, yyyy") @appt.Time</strong></div>
                                 <div>@appt.Professional?.Name</div>
                                 <div class="mt-2">
                                     <a class="btn btn-outline-primary btn-sm" href="#">Join Call</a>
