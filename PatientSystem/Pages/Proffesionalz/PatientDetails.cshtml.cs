@@ -44,5 +44,52 @@ namespace PatientSystem.Pages.Proffesionalz
 
             return Page();
         }
+
+        public async Task<IActionResult> OnPostEditMedicationAsync(int id)
+        {
+            int medId = int.Parse(Request.Form["MedicationId"]);
+            var med = await _context.Medications.FirstOrDefaultAsync(m => m.Id == medId);
+            if (med == null)
+                return NotFound();
+
+            med.Dosage = Request.Form["Dosage"];
+            med.StartDate = DateTime.Parse(Request.Form["StartDate"]);
+            var endDateStr = Request.Form["EndDate"];
+            med.EndDate = string.IsNullOrWhiteSpace(endDateStr) ? null : DateTime.Parse(endDateStr);
+            await _context.SaveChangesAsync();
+            return RedirectToPage(new { id });
+        }
+
+        public async Task<IActionResult> OnPostDeleteMedicationAsync(int id, int medicationId)
+        {
+            var med = await _context.Medications.FirstOrDefaultAsync(m => m.Id == medicationId);
+            if (med != null)
+            {
+                _context.Medications.Remove(med);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage(new { id });
+        }
+
+        public async Task<IActionResult> OnPostAddMedicationAsync(int id)
+        {
+            var name = Request.Form["Name"];
+            var dosage = Request.Form["Dosage"];
+            var startDate = DateTime.Parse(Request.Form["StartDate"]);
+            var endDateStr = Request.Form["EndDate"];
+            DateTime? endDate = string.IsNullOrWhiteSpace(endDateStr) ? null : DateTime.Parse(endDateStr);
+
+            var medication = new Medication
+            {
+                PatientId = id,
+                Name = name,
+                Dosage = dosage,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+            _context.Medications.Add(medication);
+            await _context.SaveChangesAsync();
+            return RedirectToPage(new { id });
+        }
     }
 }

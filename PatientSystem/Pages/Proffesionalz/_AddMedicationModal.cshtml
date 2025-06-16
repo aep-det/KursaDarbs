@@ -1,0 +1,35 @@
+<!-- Modal for adding medication -->
+<div class="modal fade" id="addMedicationModal" tabindex="-1" aria-labelledby="addMedicationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addMedicationForm" method="post">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addMedicationModalLabel">Add Medication</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="addName" class="form-label">Name</label>
+            <input type="text" class="form-control" name="Name" id="addName" required />
+          </div>
+          <div class="mb-3">
+            <label for="addDosage" class="form-label">Dosage</label>
+            <input type="text" class="form-control" name="Dosage" id="addDosage" required />
+          </div>
+          <div class="mb-3">
+            <label for="addStartDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" name="StartDate" id="addStartDate" required />
+          </div>
+          <div class="mb-3">
+            <label for="addEndDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" name="EndDate" id="addEndDate" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Add Medication</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
