@@ -30,6 +30,7 @@ namespace PatientSystem.Pages.Patientz
         public List<string> Allergies { get; set; } = new(); // Placeholder
         public List<Medication> Medications { get; set; } = new();
         public string Notes { get; set; } = string.Empty; // Placeholder
+        public List<Note> NotesList { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -52,11 +53,9 @@ namespace PatientSystem.Pages.Patientz
                 .OrderBy(a => a.Date)
                 .ToListAsync();
 
-            // TODO: Replace with real allergies and notes logic
             Allergies = new List<string> { "Penicillin", "Peanuts" };
             Medications = await _context.Medications.Where(m => m.PatientId == Patient.Id).ToListAsync();
-            Notes = "Sample notes for patient.";
-
+            NotesList = await _context.Notes.Where(n => n.PatientId == Patient.Id).OrderByDescending(n => n.CreatedAt).ToListAsync();
             return Page();
         }
     }

@@ -21,6 +21,7 @@ namespace PatientSystem.Data
         public DbSet<Diagnostic> Diagnostics { get; set; }
         public DbSet<Medication> Medications { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Note> Notes { get; set; }
     }
 
     public class Patient
@@ -141,5 +142,16 @@ namespace PatientSystem.Data
 
         [DataType(DataType.DateTime)]
         public DateTime SentAt { get; set; }
+    }
+
+    public class Note
+    {
+        public int Id { get; set; }
+        [ForeignKey("Patient")]
+        public int PatientId { get; set; }
+        public Patient? Patient { get; set; }
+        public string Text { get; set; } = string.Empty;
+        [DataType(DataType.DateTime)]
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

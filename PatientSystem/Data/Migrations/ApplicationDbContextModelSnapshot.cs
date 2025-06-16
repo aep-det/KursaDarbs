@@ -352,6 +352,31 @@ namespace PatientSystem.Data.Migrations
                     b.ToTable("Medications");
                 });
 
+            modelBuilder.Entity("PatientSystem.Data.Note", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Notes");
+                });
+
             modelBuilder.Entity("PatientSystem.Data.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -527,6 +552,17 @@ namespace PatientSystem.Data.Migrations
                 });
 
             modelBuilder.Entity("PatientSystem.Data.Medication", b =>
+                {
+                    b.HasOne("PatientSystem.Data.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("PatientSystem.Data.Note", b =>
                 {
                     b.HasOne("PatientSystem.Data.Patient", "Patient")
                         .WithMany()

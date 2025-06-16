@@ -22,6 +22,9 @@ namespace PatientSystem.Pages.Proffesionalz
         public List<string> Allergies { get; set; } = new(); // Placeholder, adjust as needed
         public List<Medication> Medications { get; set; } = new();
         public string Notes { get; set; } = string.Empty; // Placeholder, adjust as needed
+        public List<Note> NotesList { get; set; } = new();
+        [BindProperty]
+        public string NewNoteText { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -41,6 +44,7 @@ namespace PatientSystem.Pages.Proffesionalz
             Allergies = new List<string> { "Penicillin", "Peanuts" };
             Medications = await _context.Medications.Where(m => m.PatientId == id).ToListAsync();
             Notes = "Sample notes for patient.";
+            NotesList = await _context.Notes.Where(n => n.PatientId == id).OrderByDescending(n => n.CreatedAt).ToListAsync();
 
             return Page();
         }
@@ -89,6 +93,22 @@ namespace PatientSystem.Pages.Proffesionalz
             };
             _context.Medications.Add(medication);
             await _context.SaveChangesAsync();
+            return RedirectToPage(new { id });
+        }
+
+        public async Task<IActionResult> OnPostAddNoteAsync(int id)
+        {
+            if (!string.IsNullOrWhiteSpace(NewNoteText))
+            {
+                var note = new Note
+                {
+                    PatientId = id,
+                    Text = NewNoteText,
+                    CreatedAt = DateTime.Now
+                };
+                _context.Notes.Add(note);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToPage(new { id });
         }
     }
