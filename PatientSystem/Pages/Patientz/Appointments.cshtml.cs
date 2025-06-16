@@ -69,12 +69,11 @@ namespace PatientSystem.Pages.Patientz
                 Appointments = new List<Appointment>();
                 ProfessionalOptions = new List<SelectListItem>();
             }
-            LoadAvailableTimes();
+            LoadAvailableTimes(NewAppointment.ProfessionalId != 0 ? NewAppointment.ProfessionalId : (int?)null, NewAppointment.Date != DateTime.MinValue ? NewAppointment.Date : (DateTime?)null);
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            LoadAvailableTimes();
             Specialities = await _context.Professionals
                 .Select(p => p.Specialization)
                 .Distinct()
@@ -87,12 +86,27 @@ namespace PatientSystem.Pages.Patientz
             {
                 ModelState.AddModelError(string.Empty, "Could not resolve patient for current user.");
                 await LoadAppointmentsAndProfessionals(null, null);
+                LoadAvailableTimes();
                 return Page();
             }
 
             if (!ModelState.IsValid)
             {
                 await LoadAppointmentsAndProfessionals(patient.Id, null);
+                LoadAvailableTimes(NewAppointment.ProfessionalId != 0 ? NewAppointment.ProfessionalId : (int?)null, NewAppointment.Date != DateTime.MinValue ? NewAppointment.Date : (DateTime?)null);
+                return Page();
+            }
+
+            // Prevent double-booking for the same professional, date, and time
+            bool slotTaken = await _context.Appointments.AnyAsync(a =>
+                a.ProfessionalId == NewAppointment.ProfessionalId &&
+                a.Date == NewAppointment.Date &&
+                a.Time == NewAppointment.Time);
+            if (slotTaken)
+            {
+                ModelState.AddModelError("NewAppointment.Time", "This time slot is already taken for the selected professional and date.");
+                await LoadAppointmentsAndProfessionals(patient.Id, null);
+                LoadAvailableTimes(NewAppointment.ProfessionalId != 0 ? NewAppointment.ProfessionalId : (int?)null, NewAppointment.Date != DateTime.MinValue ? NewAppointment.Date : (DateTime?)null);
                 return Page();
             }
 
@@ -136,9 +150,9 @@ namespace PatientSystem.Pages.Patientz
             }
         }
 
-        private void LoadAvailableTimes()
+        private void LoadAvailableTimes(int? professionalId = null, DateTime? date = null)
         {
-            AvailableTimes = new List<SelectListItem>
+            var allTimes = new List<SelectListItem>
             {
                 new SelectListItem { Value = "09:00", Text = "09:00" },
                 new SelectListItem { Value = "10:00", Text = "10:00" },
@@ -147,6 +161,19 @@ namespace PatientSystem.Pages.Patientz
                 new SelectListItem { Value = "14:00", Text = "14:00" },
                 new SelectListItem { Value = "15:00", Text = "15:00" }
             };
+
+            if (professionalId.HasValue && date.HasValue)
+            {
+                var takenTimes = _context.Appointments
+                    .Where(a => a.ProfessionalId == professionalId.Value && a.Date == date.Value)
+                    .Select(a => a.Time)
+                    .ToList();
+                AvailableTimes = allTimes.Where(t => !takenTimes.Contains(t.Value)).ToList();
+            }
+            else
+            {
+                AvailableTimes = allTimes;
+            }
         }
     }
 }
