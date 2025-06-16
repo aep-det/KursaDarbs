@@ -4,6 +4,20 @@
     ViewData["Title"] = "My Medical Record";
 }
 
+<style>
+    .allergy-badge {
+        background: #0d6efd !important;
+        color: #fff !important;
+        margin-right: 6px;
+        font-size: 0.95em;
+        border-radius: 5px;
+        padding: 2px 10px;
+        display: inline-block;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+</style>
+
 <h1>My Medical Record</h1>
 
 @if (Model.Patient != null)
@@ -57,6 +71,9 @@
                     <div class="card p-3" style="min-width:260px;">
                         <div><strong>@appt.Date.ToString("dddd, MMM dd, yyyy") @appt.Time</strong></div>
                         <div>@appt.Professional?.Name</div>
+                        <form method="post" asp-page-handler="DeleteAppointment" asp-route-appointmentId="@appt.Id" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm mt-2">Delete</button>
+                        </form>
                     </div>
                 }
             </div>
@@ -76,7 +93,7 @@
             <div>
                 @foreach (var allergy in Model.Allergies)
                 {
-                    <span class="badge bg-info text-dark me-1">@allergy</span>
+                    <span class="allergy-badge">@allergy</span>
                 }
             </div>
         }

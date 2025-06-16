@@ -58,5 +58,16 @@ namespace PatientSystem.Pages.Patientz
             NotesList = await _context.Notes.Where(n => n.PatientId == Patient.Id).OrderByDescending(n => n.CreatedAt).ToListAsync();
             return Page();
         }
+
+        public async Task<IActionResult> OnPostDeleteAppointmentAsync(int appointmentId)
+        {
+            var appt = await _context.Appointments.FirstOrDefaultAsync(a => a.Id == appointmentId);
+            if (appt != null)
+            {
+                _context.Appointments.Remove(appt);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToPage();
+        }
     }
 }
