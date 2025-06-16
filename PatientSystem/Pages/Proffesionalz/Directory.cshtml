@@ -1,0 +1,25 @@
+@page
+@model PatientSystem.Pages.Proffesionalz.DirectoryModel
+@{
+    ViewData["Title"] = "Professional Directory";
+}
+
+<h1>Professional Directory</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Specialization</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var professional in Model.Professionals)
+    {
+        <tr>
+            <td>@professional.Name</td>
+            <td>@professional.Specialization</td>
+        </tr>
+    }
+    </tbody>
+</table>
