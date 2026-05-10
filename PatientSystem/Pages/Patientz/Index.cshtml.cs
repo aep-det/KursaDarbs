@@ -21,10 +21,26 @@ namespace PatientSystem.Pages.Patientz
         }
 
         public IList<Patient> Patient { get; set; } = default!;
+        
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+        
+        public int PageSize { get; set; } = 10;
+        public int TotalPages { get; set; }
+        public int TotalRecords { get; set; }
 
         public async Task OnGetAsync()
         {
-            Patient = await _context.Patients.ToListAsync();
+            TotalRecords = await _context.Patients.CountAsync();
+            TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
+            
+            if (PageNumber < 1) PageNumber = 1;
+            if (PageNumber > TotalPages && TotalPages > 0) PageNumber = TotalPages;
+            
+            Patient = await _context.Patients
+                .Skip((PageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
         }
     }
 }

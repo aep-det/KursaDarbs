@@ -63,8 +63,9 @@ using (var scope = app.Services.CreateScope())
 
         // admin user
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-        var adminEmail = "admin@example.com";
-        var adminPassword = "Admin@123";
+        var config = services.GetRequiredService<IConfiguration>();
+        var adminEmail = config["AdminCredentials:Email"] ?? "admin@example.com";
+        var adminPassword = config["AdminCredentials:Password"] ?? "Admin@123";
 
         var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail };
         var userExist = await userManager.FindByEmailAsync(adminEmail);
@@ -77,7 +78,7 @@ using (var scope = app.Services.CreateScope())
 
         #region Create default roles and users for testing purposes
 
-        var defaultPassword = "Test123!"; // Or use a secure one
+        var defaultPassword = config["DefaultPassword"] ?? "Test123!"; // Or use a secure one
 
         foreach (var patient in context.Patients.ToList())
         {

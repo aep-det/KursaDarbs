@@ -4,103 +4,105 @@
     ViewData["Title"] = "Professional Dashboard";
 }
 
-<div class="proffesionalz-theme">
-<h1>Professional Dashboard</h1>
+<div class="proffesionalz-theme py-4 px-3">
+    <div class="container-fluid">
+        <h1>Professional Dashboard</h1>
 
-<div class="row">
-    <div class="col-md-8">
-        <form method="get" class="mb-4">
-            <div class="form-group">
-                <label for="search">Search Patient</label>
-                <input type="text" id="search" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Enter patient name..." />
-            </div>
-            <button type="submit" class="btn btn-primary mt-2">Search</button>
-        </form>
+        <div class="row">
+            <div class="col-md-8">
+                <form method="get" class="mb-4">
+                    <div class="form-group">
+                        <label for="search">Search Patient</label>
+                        <input type="text" id="search" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Enter patient name..." />
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Search</button>
+                </form>
 
-        @* Only show search results if there is a search term and results, do not show all patients by default *@
-        @if (!string.IsNullOrWhiteSpace(Model.SearchTerm) && Model.SearchResults != null && Model.SearchResults.Count > 0)
-        {
-            <div class="mb-4">
-                <h4>Search Results</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Date of Birth</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var patient in Model.SearchResults)
+                @* Only show search results if there is a search term and results, do not show all patients by default *@
+                @if (!string.IsNullOrWhiteSpace(Model.SearchTerm) && Model.SearchResults != null && Model.SearchResults.Count > 0)
+                {
+                    <div class="mb-4">
+                        <h4>Search Results</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Date of Birth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var patient in Model.SearchResults)
+                            {
+                                <tr>
+                                    <td><a asp-page="/Proffesionalz/PatientDetails" asp-route-id="@patient.Id">@patient.Name</a></td>
+                                    <td>@patient.Email</td>
+                                    <td>@patient.DateOfBirth?.ToShortDateString()</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <div class="mb-4">
+                    <h4>Upcoming Appointments</h4>
+                    @if (Model.ClosestAppointments != null && Model.ClosestAppointments.Count > 0)
                     {
-                        <tr>
-                            <td><a asp-page="/Proffesionalz/PatientDetails" asp-route-id="@patient.Id">@patient.Name</a></td>
-                            <td>@patient.Email</td>
-                            <td>@patient.DateOfBirth?.ToShortDateString()</td>
-                        </tr>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var appt in Model.ClosestAppointments)
+                            {
+                                <tr>
+                                    <td>@appt.Date.ToShortDateString()</td>
+                                    <td>@appt.Time</td>
+                                    <td>@appt.Patient?.Name</td>
+                                    <td>@appt.Status</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
                     }
-                    </tbody>
-                </table>
-            </div>
-        }
-
-        <div class="mb-4">
-            <h4>Upcoming Appointments</h4>
-            @if (Model.ClosestAppointments != null && Model.ClosestAppointments.Count > 0)
-            {
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Patient</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var appt in Model.ClosestAppointments)
+                    else
                     {
-                        <tr>
-                            <td>@appt.Date.ToShortDateString()</td>
-                            <td>@appt.Time</td>
-                            <td>@appt.Patient?.Name</td>
-                            <td>@appt.Status</td>
-                        </tr>
+                        <p>No upcoming appointments found.</p>
                     }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>No upcoming appointments found.</p>
-            }
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="mb-4">
-            <h4>Notes</h4>
-            <form method="post">
-                <div class="form-group mb-2">
-                    <textarea name="NoteText" class="form-control" rows="8" placeholder="Add a note...">@Model.NoteText</textarea>
                 </div>
-                <button type="submit" class="btn btn-secondary">Save Note</button>
-            </form>
-            @if (Model.Notes != null && Model.Notes.Count > 0)
-            {
-                <ul class="list-group mt-2">
-                    @foreach (var note in Model.Notes)
+            </div>
+            <div class="col-md-4">
+                <div class="mb-4">
+                    <h4>Notes</h4>
+                    <form method="post">
+                        <div class="form-group mb-2">
+                            <textarea name="NoteText" class="form-control" rows="8" placeholder="Add a note...">@Model.NoteText</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Save Note</button>
+                    </form>
+                    @if (Model.Notes != null && Model.Notes.Count > 0)
                     {
-                        <li class="list-group-item">
-                            <strong>@note.CreatedAt.ToShortDateString()</strong>: @note.Text
-                        </li>
+                        <ul class="list-group mt-2">
+                            @foreach (var note in Model.Notes)
+                            {
+                                <li class="list-group-item">
+                                    <strong>@note.CreatedAt.ToShortDateString()</strong>: @note.Text
+                                </li>
+                            }
+                        </ul>
                     }
-                </ul>
-            }
-            else
-            {
-                <p>No notes found.</p>
-            }
+                    else
+                    {
+                        <p>No notes found.</p>
+                    }
+                </div>
+            </div>
         </div>
     </div>
-</div>
 </div>
